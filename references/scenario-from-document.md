@@ -46,7 +46,11 @@ textutil -convert txt -stdout '/path/to/document.docx'
 
 **中文引号问题**：描述文本中的 ASCII 双引号 `"` 会破坏 JSON 解析。修复方式：
 1. 将中文语境的内引号替换为全角引号 `「」`
-2. 或者确保所有内引号正确转义为 `\"`
+2. 或者确保所有内引号正确转义为 `\\\"`
+
+**execute_code 状态隔离问题**：多个 execute_code 调用之间不共享状态。如果用 execute_code 分批构建 scenario.json，每个调用都 `json.dump` 到同一文件→后一次覆盖前一次，只保留最后写入的节点。**正确做法：要么单个 execute_code 一次性构建全部节点，要么用 write_file 直接写入完整 JSON。**
+
+**execute_code 状态隔离**：`execute_code` 的每次调用是独立进程，不共享变量状态。如果用多个 `execute_code` 分批构建 scenario.json，每次 `json.dump` 到同一文件——后一次覆盖前一次，只保留最后一次写入的节点。**正确做法：要么单个 `execute_code` 一次性构建全部节点+线索+NPC+战斗，要么直接用 `write_file` 写入完整 JSON。** 不要分成多次 `execute_code` 调用。
 
 **验证修复**：
 ```bash
