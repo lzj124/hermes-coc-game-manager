@@ -23,6 +23,25 @@ git clone https://github.com/lzj124/hermes-coc-game-manager.git ~/.hermes/skills
 
 All data stored in `$HERMES_HOME/coc-data/`. Scripts are self-contained — zero external dependencies.
 
+## Getting Started
+
+**1. Send your scenario to the agent.** Any format works — `.docx`, `.pdf`, `.md`, or plain text. Just say:
+
+> "我有一份剧本，帮我跑" and attach the file.
+
+**2. The agent handles everything:**
+- Creates a new campaign directory
+- Reads your scenario and converts it to structured JSON
+- Validates the JSON (catches missing failure paths, clue gaps, etc.)
+
+**3. Create your investigator.** Tell the agent your character concept, or roll stats yourself. The agent files the character sheet and shows it for your confirmation.
+
+**4. Start playing.** The agent calls `resume`, describes the opening scene, and waits for your action. From here on, just talk — the agent handles dice, clues, NPCs, and memory.
+
+> **Continuing a campaign:** Next time, just say "继续跑团" — the agent auto-loads your progress.
+
+Full walkthrough → [GETTING_STARTED.md](GETTING_STARTED.md)
+
 ## Why
 
 Generic AI GMing has two fatal flaws:
@@ -137,6 +156,25 @@ git clone https://github.com/lzj124/hermes-coc-game-manager.git ~/.hermes/skills
 ```
 
 数据存 `$HERMES_HOME/coc-data/`，脚本自包含零外部依赖。
+
+## 快速上手
+
+**1. 把剧本发给 agent。** 什么格式都行——`.docx`、`.pdf`、`.md`、纯文本。直接说：
+
+> "我有一份剧本，帮我跑" 然后发文件。
+
+**2. agent 自动处理：**
+- 创建新战役目录
+- 读取剧本，转成结构化 JSON
+- 校验 JSON（自动检查漏写的失败路径、线索缺文本等）
+
+**3. 创建调查员。** 告诉 agent 你想玩什么角色，或者自己掷属性。agent 建档后展示全卡让你确认。
+
+**4. 开始跑。** agent 调 `resume`，描述开场场景，等你行动。之后你只管说话——骰子、线索、NPC、记忆全部 agent 管。
+
+> **继续上次的团：** 下次直接说"继续跑团"，agent 自动恢复全部进度。
+
+完整指引 → [GETTING_STARTED.md](GETTING_STARTED.md)
 
 ## 为什么
 
