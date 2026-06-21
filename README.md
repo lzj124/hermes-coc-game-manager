@@ -1,8 +1,25 @@
-# COC 跑团助手 — 让 AI 当守秘人
+# COC 跑团助手 — Hermes Agent Skill
+
+> 🎲 AI 当 KP，Python 掷真骰子，结构化剧本防剧透。
 
 ## 这是什么
 
-一个帮你跑 **COC（克苏鲁的呼唤）** 桌面角色扮演游戏的 AI 系统。你提供剧本，AI 当 KP（守秘人，即主持人），带着你扮演调查员推进剧情。**骰子是 Python 真随机，不是 AI 瞎编的。**
+一个 **Hermes Agent skill**，帮你跑 **COC（克苏鲁的呼唤）** 桌面角色扮演游戏。你提供剧本，AI 当 KP（守秘人），带着你扮演调查员推进剧情。**骰子是 Python 真随机，不是 AI 瞎编的。**
+
+## 安装
+
+```bash
+# 方式1：从 Hermes 技能注册表安装
+hermes skills install hermes-coc-game-manager
+
+# 方式2：从 GitHub 直接装
+hermes skills install https://raw.githubusercontent.com/lzj124/hermes-coc-game-manager/main/SKILL.md
+
+# 方式3：手动克隆
+git clone https://github.com/lzj124/hermes-coc-game-manager.git ~/.hermes/skills/leisure/coc-game-manager
+```
+
+数据存在 `$HERMES_HOME/coc-data/`，脚本全部自包含，零外部依赖。
 
 ## 为什么需要它
 
@@ -62,25 +79,26 @@ AI 拿到这段数据后：
 
 | 功能 | 说明 |
 |------|------|
-| **创建角色** | 录入调查员属性、技能、物品，跟踪 HP/SAN |
+| **创建角色** | 录入调查员属性、技能、物品，跟踪 HP/SAN/MP |
 | **管理剧本** | 把 PDF/TXT/Markdown 剧本转成结构化 JSON |
 | **跑团** | 逐场景推进，自动管理线索、NPC 对话、检定 |
 | **真骰子** | 所有检定走 `roll.py`，大成功/大失败按 COC 7版规则判定 |
-| **跨天续跑** | 关掉明天打开接着说，不会忘进度 |
+| **跨天续跑** | 关掉明天打开接着说，`resume` 自动注入完整进度 |
 | **校验剧本** | `validate` 检查剧本有没有漏写失败路径、线索缺文本 |
+| **战役隔离** | 多战役独立目录，角色/状态/笔记互不串 |
 | **多结局** | 根据玩家选择分叉到不同结局节点 |
 | **战役笔记** | 自动记录关键决策、NPC 状态变化、事件伏笔 |
 | **自由探索** | 支持多地点自由探索模式，不限制顺序 |
 
-## 和 ChatGPT 直接跑团有什么区别
+## 与普通 AI 跑团的区别
 
-| | ChatGPT 直接跑 | 这个系统 |
+| | 普通 AI 跑团 | 本系统 |
 |------|------|------|
 | 骰子 | "你掷出了 35——成功！"（可能是编的） | Python `random.randint(1,100)` 真随机 |
 | 记忆 | 聊多了前面忘光 | `resume` 启动时自动注入完整进度 |
 | 剧本 | AI 自由发挥，容易跑偏 | 结构化 JSON，每个检定有成功和失败两条路 |
 | NPC | 可能剧透别人的秘密 | 只能说自己知道的事，不能说别人秘密 |
-| 进度 | 关了就没了 | 永久存储到磁盘，下次打开继续 |
+| 进度 | 关了就没了 | 永久存储到 `$HERMES_HOME/coc-data/` |
 
 ## 设计理念
 
