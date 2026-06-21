@@ -1,120 +1,167 @@
-# COC 跑团助手 — Hermes Agent Skill
+# COC Game Manager — Hermes Agent Skill
+
+> 🎲 AI as Keeper, Python dice, structured scenario engine.
+
+[中文](#coc-跑团助手)
+
+## What
+
+A **Hermes Agent skill** for running **Call of Cthulhu (CoC)** tabletop RPG sessions. You provide the scenario, the AI acts as Keeper, guiding your investigator through the story. **Dice are real Python `random.randint`, not AI hallucination.**
+
+## Install
+
+```bash
+# Option 1: Hermes skill registry
+hermes skills install coc-game-manager
+
+# Option 2: Direct from GitHub
+hermes skills install https://raw.githubusercontent.com/lzj124/hermes-coc-game-manager/main/SKILL.md
+
+# Option 3: Manual clone
+git clone https://github.com/lzj124/hermes-coc-game-manager.git ~/.hermes/skills/leisure/coc-game-manager
+```
+
+All data stored in `$HERMES_HOME/coc-data/`. Scripts are self-contained — zero external dependencies.
+
+## Why
+
+Generic AI GMing has two fatal flaws:
+
+1. **No memory** — forgets clues from Act 1 by Act 3, NPC dialogue contradicts itself
+2. **Fake dice** — "You rolled a 35 — success!" (AI made it up)
+
+This system fixes both:
+
+- A **structured scenario file** (JSON) defining every scene, NPC, clue, and check
+- A **real dice roller** (Python `random.randint`) — success/failure is real
+
+## Quick Start
+
+```
+You: Create a private investigator character
+AI: Got it. What's your stat line? Let me file the character sheet.
+
+You: *rolls stats*
+AI: Recorded. Starting "The Short-Sighted" —
+
+You: I knock on Professor Vaughan's door
+AI: (reads the scene description, Vaughan's dialogue, available checks from the scenario...)
+```
+
+You just talk. The AI handles scenarios, dice, character state, and memory.
+
+## What a Scenario Looks Like
+
+Scenarios aren't natural language — they're structured data. What's behind a door, what an NPC knows, what happens on success vs. failure — all pre-written:
+
+```json
+"Vaughan's Doorstep": {
+  "description": "17 Miller Street. Porch light on. A ring of copper coils in the yard.",
+  "npcs": [{
+    "name": "Vaughan",
+    "opening": "Who are you? It's late.",
+    "secret": "Running a dimensional experiment in the basement. Ritual at 3:17 AM Oct 25."
+  }],
+  "checks": [{
+    "name": "Fast Talk to convince Vaughan",
+    "skill": 55,
+    "info": "Vaughan relents, lets you in — living room only",
+    "on_failure": "He sees through you. Slams the door."
+  }]
+}
+```
+
+With this data the AI:
+- Only speaks lines the NPC knows
+- Only shows what the investigator can see
+- Rolls real dice for the Fast Talk check
+- Never reveals Vaughan's `secret` — the player must discover it
+
+## Features
+
+| Feature | Description |
+|---------|-------------|
+| **Character creation** | Track attributes, skills, inventory, HP/SAN/MP |
+| **Scenario management** | Convert PDF/TXT/Markdown modules to structured JSON |
+| **Real dice** | Python `random.randint(1,100)` with COC 7th edition critical rules |
+| **Multi-session** | Close and continue tomorrow — `resume` injects full progress |
+| **Scenario validation** | `validate` catches missing failure paths and clue gaps |
+| **Campaign isolation** | Separate directories per campaign, no cross-contamination |
+| **Multiple endings** | Branch to different endings based on player choices |
+| **Campaign journal** | Auto-records key decisions, NPC state changes, foreshadowed events |
+| **Free exploration** | Multi-location sandbox with no fixed order |
+
+## vs. Generic AI GMing
+
+| | Generic AI | This System |
+|------|------|------|
+| Dice | "You rolled 35 — success!" (maybe fake) | Python `random.randint(1,100)` real random |
+| Memory | Forgets earlier scenes | `resume` auto-injects full session state |
+| Scenario | AI improvises, goes off-rails | Structured JSON with success/failure for every check |
+| NPCs | May leak others' secrets | Only speaks what they know |
+| Persistence | Gone when you close the tab | Permanent storage in `$HERMES_HOME/coc-data/` |
+
+## Design
+
+Inspired by Claude Code's memory architecture. Four principles:
+
+1. **Structured over free-form** — clues, checks, NPCs all have fixed schemas
+2. **Index always loaded, content on demand** — compact summary injected at session start
+3. **Never store derivable data** — don't duplicate what's already in the scenario
+4. **Force injection at startup** — AI doesn't "remember" to check state; the system does
+
+## Use Cases
+
+- 🎲 Solo CoC player without a Keeper
+- 📝 Module authors testing custom scenarios
+- 🔧 Developers studying how structured data constrains AI agents
+
+---
+
+# COC 跑团助手
 
 > 🎲 AI 当 KP，Python 掷真骰子，结构化剧本防剧透。
 
 ## 这是什么
 
-一个 **Hermes Agent skill**，帮你跑 **COC（克苏鲁的呼唤）** 桌面角色扮演游戏。你提供剧本，AI 当 KP（守秘人），带着你扮演调查员推进剧情。**骰子是 Python 真随机，不是 AI 瞎编的。**
+**Hermes Agent skill**，帮你跑 COC 桌面角色扮演游戏。AI 当守秘人，骰子是 Python 真随机。
 
 ## 安装
 
 ```bash
-# 方式1：从 Hermes 技能注册表安装
-hermes skills install hermes-coc-game-manager
-
-# 方式2：从 GitHub 直接装
+hermes skills install coc-game-manager
+# 或
 hermes skills install https://raw.githubusercontent.com/lzj124/hermes-coc-game-manager/main/SKILL.md
-
-# 方式3：手动克隆
+# 或
 git clone https://github.com/lzj124/hermes-coc-game-manager.git ~/.hermes/skills/leisure/coc-game-manager
 ```
 
-数据存在 `$HERMES_HOME/coc-data/`，脚本全部自包含，零外部依赖。
+数据存 `$HERMES_HOME/coc-data/`，脚本自包含零外部依赖。
 
-## 为什么需要它
+## 为什么
 
-普通 AI 跑团有两个致命问题：
+普通 AI 跑团两大问题：没记性 + 假骰子。本系统用结构化 JSON 剧本 + Python 真随机骰子解决。
 
-1. **AI 没记性** — 聊到第三幕忘了第一幕查到的线索，NPC 说过的话对不上
-2. **AI 会作弊** — "你觉得你成功了" —— 其实是 AI 主观判断的，不是骰子决定的
-
-这个系统用两样东西解决：
-
-- 一个 **结构化的剧本文件**（JSON），把每个场景、NPC、线索、检定写清楚，AI 按图索骥
-- 一个 **真随机骰子脚本**（Python `random.randint`），成功/失败由骰子说了算
-
-## 怎么用
-
-```
-你：我要创建一个私家侦探角色
-AI：好，属性骰出来了吗？我帮你建档
-
-你：*丢骰子*
-AI：记录。现在开始跑《短视的人》——
-
-你：我去敲沃恩教授的门
-AI：（从剧本读出门口的场景描述、沃恩的台词、可用的检定……）
-```
-
-你只需要说话。AI 负责查剧本、掷骰子、管理角色状态、记住进度。
-
-## 剧本长什么样
-
-剧本不是自然语言，是结构化数据。一扇门后面有什么、NPC 知道什么秘密、检定成功和失败分别发生什么——全部预写进去：
-
-```json
-"沃恩家门口": {
-  "description": "米勒街7号，门廊灯亮着。前院有一圈铜线圈绕成的装置。",
-  "npcs": [{
-    "name": "沃恩",
-    "opening": "你是谁？这么晚了。",
-    "secret": "地下室在做升维实验，10月25日凌晨3:17是仪式时间"
-  }],
-  "checks": [{
-    "name": "话术说服沃恩开门",
-    "skill": 55,
-    "info": "沃恩让步，让你进屋谈——但只限客厅",
-    "on_failure": "他看穿你的来意，拒绝开门，告诉你'后天凌晨实验完成'"
-  }]
-}
-```
-
-AI 拿到这段数据后：
-- 只能说沃恩能说的台词
-- 只展示玩家角色能看见的东西
-- 话术检定掷骰子，成功走 `info`，失败走 `on_failure`
-- 沃恩的 `secret` 不能说——必须玩家自己查出来
-
-## 功能一览
+## 功能
 
 | 功能 | 说明 |
 |------|------|
-| **创建角色** | 录入调查员属性、技能、物品，跟踪 HP/SAN/MP |
-| **管理剧本** | 把 PDF/TXT/Markdown 剧本转成结构化 JSON |
-| **跑团** | 逐场景推进，自动管理线索、NPC 对话、检定 |
-| **真骰子** | 所有检定走 `roll.py`，大成功/大失败按 COC 7版规则判定 |
-| **跨天续跑** | 关掉明天打开接着说，`resume` 自动注入完整进度 |
-| **校验剧本** | `validate` 检查剧本有没有漏写失败路径、线索缺文本 |
-| **战役隔离** | 多战役独立目录，角色/状态/笔记互不串 |
-| **多结局** | 根据玩家选择分叉到不同结局节点 |
-| **战役笔记** | 自动记录关键决策、NPC 状态变化、事件伏笔 |
-| **自由探索** | 支持多地点自由探索模式，不限制顺序 |
-
-## 与普通 AI 跑团的区别
-
-| | 普通 AI 跑团 | 本系统 |
-|------|------|------|
-| 骰子 | "你掷出了 35——成功！"（可能是编的） | Python `random.randint(1,100)` 真随机 |
-| 记忆 | 聊多了前面忘光 | `resume` 启动时自动注入完整进度 |
-| 剧本 | AI 自由发挥，容易跑偏 | 结构化 JSON，每个检定有成功和失败两条路 |
-| NPC | 可能剧透别人的秘密 | 只能说自己知道的事，不能说别人秘密 |
-| 进度 | 关了就没了 | 永久存储到 `$HERMES_HOME/coc-data/` |
+| 创建角色 | 属性/技能/物品，跟踪 HP/SAN/MP |
+| 结构化剧本 | PDF/TXT/Markdown 转 JSON |
+| 真骰子 | `random.randint(1,100)`，COC 7版大成功大失败 |
+| 跨天续跑 | `resume` 自动注入完整进度 |
+| 战役隔离 | 多战役独立目录互不串 |
+| 多结局 | 根据选择分叉 |
+| 战役笔记 | 自动记录决策/NPC状态/伏笔 |
+| 自由探索 | 多地点不限制顺序 |
 
 ## 设计理念
 
-受 Claude Code 记忆机制启发，四条核心原则：
-
-1. **结构化优于自由文本** — 线索、检定、NPC 全有固定 schema，不写"自由描述"
-2. **索引常驻 + 内容按需** — 会话启动时注入紧凑摘要，减少 token 消耗
-3. **禁止存能推出来的** — 不把剧本已有的内容重复存储
-4. **启动时强制注入** — AI 不需要"记住"查状态，系统自动注入
-
-## 适用场景
-
-- 🎲 一个人想跑 COC 但没有 KP
-- 📝 模组作者快速测试自创剧本
-- 🔧 想了解 AI agent 如何被结构化数据约束的开发者
+1. 结构化优于自由文本
+2. 索引常驻 + 内容按需
+3. 禁止存可推导数据
+4. 启动时强制注入
 
 ---
 
-*剧本 JSON 完整规范见 `references/scenario-schema.md`*
+*Scenario JSON schema: `references/scenario-schema.md`*

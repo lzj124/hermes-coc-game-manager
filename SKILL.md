@@ -7,6 +7,8 @@ triggers: 跑团, COC, 克苏鲁, 守秘人, KP, 创建角色, 调查员, 车卡
 # COC 游戏管理器 — 跑团唯一入口
 
 > ⚠️ **这是 COC 跑团唯一需要加载的 skill。** 加载这个就够，骰子走内置 `scripts/roll.py`。零外部依赖。
+>
+> [English version](SKILL_EN.md)
 
 ## 设计哲学
 
